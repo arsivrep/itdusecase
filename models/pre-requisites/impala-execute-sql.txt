@@ -1,4 +1,4 @@
-# This is the table that is required for the ML-code to write the end result
+# This is the table that is required for the ML-code to write the end result.
 
 CREATE TABLE IF NOT EXISTS win_profile_ml_score (name string, type string, time_window string, execution_date bigint, failedlogin_count bigint, fileactivity_count bigint, logins_count bigint, other_scripts_count bigint, pri_count bigint, ps_count bigint, zscore string , pas_kmeans double, pas_isolation double, pas_svm double, pas double) PARTITIONED BY ( y int, m int, d int); 
 
