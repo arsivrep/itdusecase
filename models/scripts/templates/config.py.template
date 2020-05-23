@@ -1,0 +1,90 @@
+import json
+# path for tenant related data
+TENANT_NAME = <TENANT-NAME>
+BASE_PATH = "/user/elysium/" + TENANT_NAME
+
+LOG_FOLDER = <LOG-FOLDER>
+LOG_LEVEL= <LOG-LEVEL>
+PYSPARK_LOGLEVEL = <PYSPARK-LOGLEVEL>
+
+YEAR = 2019
+MONTH = 9
+DAY = 1
+
+# repositary path
+ANOMALY_MODEL_REPOSITORY = BASE_PATH + "/models_data/model"
+ANOMALY_DATA_REPOSITORY = BASE_PATH + "/models_data/data"
+
+# training data path
+USER_PROFILE_DATA_PATH = ANOMALY_DATA_REPOSITORY + "/{data_source}/{entity_type}/{anomaly_type}/{time_window}.json"
+
+# model paths
+PROFILE_ANOMALY_MODEL_PATH = ANOMALY_MODEL_REPOSITORY + "/{data_source}/{anomaly_type}/{entity_type}/{time_window}/{model_name}"
+EVENT_ANOMALY_MODEL_PATH = ANOMALY_MODEL_REPOSITORY + "/{data_source}/{anomaly_type}/{model_name}"
+
+# time window
+
+TIME_WINDOW_VALUE_UNIT_DICT = {"hour": {"value": 1, "unit": "HOURS"},
+                               "day": {"value": 24, "unit": "HOURS"},
+                               "week": {"value": 7*24, "unit": "HOURS"},
+                               "month": {"value": 30*24, "unit": "HOURS"}}
+
+TIME_WINDOW_TIMESTAMP_DICT = {"hour": TIME_WINDOW_VALUE_UNIT_DICT["hour"]["value"] * 60 * 60 * 1000,
+                              "day": TIME_WINDOW_VALUE_UNIT_DICT["day"]["value"] * 60 * 60 * 1000,
+                              "week": TIME_WINDOW_VALUE_UNIT_DICT["week"]["value"] * 60 * 60 * 1000,
+                              "month": TIME_WINDOW_VALUE_UNIT_DICT["month"]["value"] * 60 * 60 * 1000}
+
+TIME_WINDOW_LIST = TIME_WINDOW_TIMESTAMP_DICT.keys()
+
+# entity types
+USER_TYPE = "user"
+ENTITY_TYPE = "entity"
+
+# anomaly types
+PROFILE_ANOMALY_TYPE = "profile"
+EVENT_ANOMALY_TYPE = "event"
+
+# model types
+PYSPARK_KMEANS_MODEL = "pyspark_kmeans"
+SKLEARN_ISOLATION_FOREST_MODEL = "sklearn_isolationforest"
+SKLEARN_ONECLASS_SVM_MODEL = "sklearn_oneclasssvm"
+
+
+SLACK_CHANNEL = <SLACK-CHANNEL>
+SLACK_BOT_TOKEN = <SLACK-BOT-TOKEN>
+
+# HBASE co-ordinates
+USER_UPDNRATIO_URL = "http://"+<PROFILER-DATA-SERVER-IP>+":"+<PROFILER-DATA-SERVER-PORT>+"/$attribute_name$per"+USER_TYPE+"?tenantid={tenant_name}&source={source}&value={value}&unit={unit}"
+IP_UPDNRATIO_URL = "http://"+<PROFILER-DATA-SERVER-IP>+":"+<PROFILER-DATA-SERVER-PORT>+"/$attribute_name$per"+ENTITY_TYPE+"?tenantid={tenant_name}&source={source}&value={value}&unit={unit}"
+
+DEPLOYMENT_TYPE = <DEPLOYMENT-TYPE>
+
+
+
+ALERT_WEIGHT_JSON = ""<ALERT-WEIGHT-JSON>""
+ALERT_WEIGHT_DICT = json.loads(ALERT_WEIGHT_JSON)
+
+KAFKA_BROKER_LIST = <KAFKA-BROKER-LIST>
+
+KAFKA_TOPIC = <KAFKA-TOPIC>
+
+SPARK_STREAMING_CHECKPOINT_PATH = <SPARK-STREAMING-CHECKPOINT-PATH>
+
+DATA_SOURCE_STRING_LIST = <DATA-SOURCE-LIST>
+DATA_SOURCE_LIST = DATA_SOURCE_STRING_LIST.split(",")
+
+PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING = <PROFILE-MODEL-CATEGORICAL-COLUMNS-STRING>
+PROFILE_MODEL_CATEGORICAL_COLUMNS = [] if PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING == "null" else PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING.split(",")
+PROFILE_MODEL_NUMERICAL_COLUMNS_STRING = <PROFILE-MODEL-NUMERICAL-COLUMNS-STRING>
+PROFILE_MODEL_NUMERICAL_COLUMNS = [] if PROFILE_MODEL_NUMERICAL_COLUMNS_STRING == "null" else PROFILE_MODEL_NUMERICAL_COLUMNS_STRING.split(",")
+
+EVENT_MODEL_CATEGORICAL_COLUMNS_STRING = <EVENT-MODEL-CATEGORICAL-COLUMNS-STRING>
+EVENT_MODEL_CATEGORICAL_COLUMNS = [] if EVENT_MODEL_CATEGORICAL_COLUMNS_STRING == "null" else EVENT_MODEL_CATEGORICAL_COLUMNS_STRING.split(",")
+EVENT_MODEL_NUMERICAL_COLUMNS_STRING = <EVENT-MODEL-NUMERICAL-COLUMNS-STRING>
+EVENT_MODEL_NUMERICAL_COLUMNS = [] if EVENT_MODEL_NUMERICAL_COLUMNS_STRING == "null" else EVENT_MODEL_NUMERICAL_COLUMNS_STRING.split(",")
+
+EVENT_SCORING_STREAMING_WINDOW = 180
+
+KAFKA_GROUP_ID = <KAFKA-GROUP-ID>
+
+MAX_EVENT_RECORD_COUNT=1500

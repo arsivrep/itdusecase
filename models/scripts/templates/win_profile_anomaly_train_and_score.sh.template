@@ -1,0 +1,4 @@
+spark2-submit --master local <PWD>/model_platform/src/operationalization/anomaly/<DATA-SOURCE>_profile_anomaly/train_and_score.py --params '{"data_source":"<DATA-SOURCE>"}'
+
+impala-shell -i lseclakew09p.secure.csa.local --ssl --ca_cert=/opt/cloudera/security/x509/impala.pem -q "refresh win_ml_aggregation;"
+impala-shell -i lseclakew09p.secure.csa.local --ssl --ca_cert=/opt/cloudera/security/x509/impala.pem -q "refresh win_profile_ml_score;"

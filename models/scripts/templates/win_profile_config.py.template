@@ -1,0 +1,64 @@
+import json
+# path for tenant related data
+TENANT_NAME = <TENANT-NAME>
+BASE_PATH = "/user/elysium/" + TENANT_NAME
+
+
+LOG_FOLDER = <LOG-FOLDER>
+LOG_LEVEL= <LOG-LEVEL>
+PYSPARK_LOGLEVEL = <PYSPARK-LOGLEVEL>
+
+#database conenction parameters
+DATABASE = <DATABASE>
+TABLE_NAME = <TABLE-NAME>
+WRITE_TABLE_NAME = <WRITE-TABLE-NAME>
+
+DATA_SOURCE = <DATA-SOURCE>
+ACTOR_TYPE = ['user' , 'entity']
+
+
+# Date parameters to run the model
+DATE_ARGUMENT = <DATE-ARGUMENT>
+NO_OF_DAYS = <NO-OF-DAYS>
+
+
+# repositary path
+ANOMALY_MODEL_REPOSITORY = BASE_PATH + "/models_data/model"
+ANOMALY_DATA_REPOSITORY = BASE_PATH + "/models_data/data"
+
+# training data path
+USER_PROFILE_DATA_PATH = ANOMALY_DATA_REPOSITORY + "/{data_source}/{day}/{actor_type}/{anomaly_type}.json"
+
+# model paths
+PROFILE_ANOMALY_MODEL_PATH = ANOMALY_MODEL_REPOSITORY + "/{data_source}/{day}/{actor_type}/{anomaly_type}/{model_name}"
+EVENT_ANOMALY_MODEL_PATH = ANOMALY_MODEL_REPOSITORY + "/{data_source}/{anomaly_type}/{model_name}"
+
+# time window
+
+TIME_WINDOW_VALUE_UNIT_DICT = {"day": {"value": 24, "unit": "HOURS"}}
+
+TIME_WINDOW_TIMESTAMP_DICT = {"day": TIME_WINDOW_VALUE_UNIT_DICT["day"]["value"] * 60 * 60 * 1000}
+
+TIME_WINDOW_LIST = TIME_WINDOW_TIMESTAMP_DICT.keys()
+
+# entity types
+USER_TYPE = "user"
+ENTITY_TYPE = "entity"
+
+# anomaly types
+PROFILE_ANOMALY_TYPE = "profile"
+EVENT_ANOMALY_TYPE = "event"
+
+# model types
+PYSPARK_KMEANS_MODEL = "pyspark_kmeans"
+SKLEARN_ISOLATION_FOREST_MODEL = "sklearn_isolationforest"
+SKLEARN_ONECLASS_SVM_MODEL = "sklearn_oneclasssvm"
+
+
+
+PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING = <PROFILE-MODEL-CATEGORICAL-COLUMNS-STRING>
+PROFILE_MODEL_CATEGORICAL_COLUMNS = [] if PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING == "null" else PROFILE_MODEL_CATEGORICAL_COLUMNS_STRING.split(",")
+PROFILE_MODEL_NUMERICAL_COLUMNS_STRING = <PROFILE-MODEL-NUMERICAL-COLUMNS-STRING>
+PROFILE_MODEL_NUMERICAL_COLUMNS = [] if PROFILE_MODEL_NUMERICAL_COLUMNS_STRING == "null" else PROFILE_MODEL_NUMERICAL_COLUMNS_STRING.split(",")
+
+OUTPUT_SCHEMA = ['name','type','execution_timestamp'] + PROFILE_MODEL_CATEGORICAL_COLUMNS + PROFILE_MODEL_NUMERICAL_COLUMNS + ['zscore', 'pas_kmeans', 'pas_isolation', 'pas_svm','pas', 'y', 'm', 'd']

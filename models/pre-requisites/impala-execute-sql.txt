@@ -1,0 +1,78 @@
+# This is the table that is required for the ML-code to write the end result
+
+CREATE TABLE IF NOT EXISTS win_profile_ml_score (name string, type string, time_window string, execution_date bigint, failedlogin_count bigint, fileactivity_count bigint, logins_count bigint, other_scripts_count bigint, pri_count bigint, ps_count bigint, zscore string , pas_kmeans double, pas_isolation double, pas_svm double, pas double) PARTITIONED BY ( y int, m int, d int); 
+
+# The table for the final aggregation table
+CREATE VIEW `final_aggregation_ml_profile_table` AS SELECT 
+`prf`.`name`,
+`prf`.`type`,
+`prf`.`y`,
+`prf`.`m`,
+`prf`.`d`,
+`prf`.`time_window`,
+`prf`.`failedlogin_count`,
+`prf`.`fileactivity_count`,
+`prf`.`logins_count`,
+`prf`.`other_scripts_count`,
+`prf`.`pri_count`,
+`prf`.`ps_count`,
+`alrt`.`total_events` as `win_total_events`,
+`alrt`.`is_nu_alert_count` as `total_is_nu_alert_count`,
+`alrt`.`is_ne_alert_count` as `total_is_ne_alert_count`,
+round((`alrt`.`is_nu_alert_count`/`alrt`.`total_events`)*100,2) as `is_nu_alert_ratio`,
+round((`alrt`.`is_ne_alert_count`/`alrt`.`total_events`)*100,2) as `is_ne_alert_ratio`,
+`prf`.`pas_kmeans` as `win_kmeans_pas`,
+`prf`.`pas_isolation` as `win_isf_pas`,
+`prf`.`pas_svm` as `win_svm_pas`,
+`prf`.`zscore` as `win_zscore`,
+`prf`.`pas` as `win_profile_anomaly_score`,
+`alrt`.`is_nu_alert_score`,
+`alrt`.`is_ne_alert_score`,
+round((`prf`.`pas` * 0.6 + `alrt`.`is_nu_alert_score` * 0.2 + `alrt`.`is_ne_alert_score` * 0.2 ),2)  as `overall_anomaly_score`
+from
+`default`.`win_profile_ml_score` `prf`
+left join
+(
+SELECT 
+`a`.`name`, `a`.`y`, `a`.`m`, `a`.`d`, `a`.`total_events`,  `a`.`is_nu_alert_count`, `a`.`is_ne_alert_count`, 
+CASE WHEN `b`.`is_nu_dnm` = 0 THEN 0 ELSE round((`a`.`is_nu_alert_count`/`b`.`is_nu_dnm`)*100, 2) END as `is_nu_alert_score`,
+CASE WHEN `b`.`is_ne_dnm` = 0 THEN 0 ELSE round((`a`.`is_ne_alert_count`/`b`.`is_ne_dnm`)*100, 2) END as `is_ne_alert_score`
+from  `demo`.`win_ml_aggregation` `a`
+join
+(select `win_ml_aggregation`.`y`,`win_ml_aggregation`.`m`,`win_ml_aggregation`.`d`, 
+max(`win_ml_aggregation`.`is_nu_alert_count`) - min(`win_ml_aggregation`.`is_nu_alert_count`)  as `is_nu_dnm`, 
+max(`win_ml_aggregation`.`is_ne_alert_count`) - min(`win_ml_aggregation`.`is_ne_alert_count`) as `is_ne_dnm` 
+from `demo`.`win_ml_aggregation`
+group by `win_ml_aggregation`.`y`,`win_ml_aggregation`.`m`,`win_ml_aggregation`.`d`) `b` 
+on `a`.`y` = `b`.`y` and `a`.`m`=`b`.`m` and `a`.`d`=`b`.`d`
+) `alrt`
+on `prf`.`name` = `alrt`.`name` and `prf`.`y` = `alrt`.`y` and `prf`.`m` = `alrt`.`m` and `prf`.`d` = `alrt`.`d`;
+
+
+
+# For the event aggregation table (Replace database and table name as per actual event table.
+CREATE VIEW win_ml_aggregation AS                                                                    
+SELECT 
+devicehostname name, 'user' type, y, m, d, count(*) total_events, 
+sum(CASE WHEN is_alert = TRUE AND (alerts_nu IS NOT NULL AND alerts_nu != '') THEN 1 ELSE 0 END) is_nu_alert_count, 
+sum(CASE WHEN is_alert = TRUE AND (alerts_ne IS NOT NULL AND alerts_ne != '') THEN 1 ELSE 0 END) is_ne_alert_count, 
+sum(CASE WHEN windowseventid IN ('4624', '4634') THEN 1 ELSE 0 END) logins_count, 
+sum(CASE WHEN windowseventid IN ('4656', '4659') THEN 1 ELSE 0 END) fileactivity_count, 
+sum(CASE WHEN windowseventid IN ('4625', '4634') THEN 1 ELSE 0 END) failedlogin_count, 
+sum(CASE WHEN windowseventid IN ('4688') THEN 1 ELSE 0 END) other_scripts_count, 
+sum(CASE WHEN windowseventid IN ('4672', '4707') THEN 1 ELSE 0 END) pri_count, 
+sum(CASE WHEN ((windowseventid IN ('4688') AND windowsprocessname RLIKE 'powershell\\.exe|powershell_ise\\.exe|pwsh\\.exe') OR (windowseventid IN ('4656', '4663') AND windowslogontype = 'File' AND windowsprocessname RLIKE '\\.ps1\\.|\\.psd1\\.|\\.psm1\\.|\\.ps1xm1\\.|\\.clixml\\.|\\.psc1\\.|\\.pssc\\.')) THEN 1 ELSE 0 END) ps_count 
+FROM demo.win_result 
+WHERE devicehostname IS NOT NULL AND devicehostname != '' AND deviceaddress IS NOT NULL AND deviceaddress != '' GROUP BY devicehostname, type, y, m, d 
+UNION ALL 
+SELECT deviceaddress name, 'entity' type, y, m, d, count(*)
+ total_events, 
+sum(CASE WHEN is_alert = TRUE AND (alerts_nu IS NOT NULL AND alerts_nu != '') THEN 1 ELSE 0 END) is_nu_alert_count, 
+sum(CASE WHEN is_alert = TRUE AND (alerts_ne IS NOT NULL AND alerts_ne != '') THEN 1 ELSE 0 END) is_ne_alert_count, 
+sum(CASE WHEN windowseventid IN ('4624', '4634') THEN 1 ELSE 0 END) logins_count, 
+sum(CASE WHEN windowseventid IN ('4656', '4659') THEN 1 ELSE 0 END) fileactivity_count, 
+sum(CASE WHEN windowseventid IN ('4625', '4634') THEN 1 ELSE 0 END) failedlogin_count, 
+sum(CASE WHEN windowseventid IN ('4688') THEN 1 ELSE 0 END) other_scripts_count, 
+sum(CASE WHEN windowseventid IN ('4672', '4707') THEN 1 ELSE 0 END) pri_count, sum(CASE WHEN ((windowseventid IN ('4688') AND windowsprocessname RLIKE 'powershell\\.exe|powershell_ise\\.exe|pwsh\\.exe') OR (windowseventid IN ('4656', '4663') AND windowslogontype = 'File' AND windowsprocessname RLIKE '\\.ps1\\.|\\.psd1\\.|\\.psm1\\.|\\.ps1xm1\\.|\\.clixml\\.|\\.psc1\\.|\\.pssc\\.')) THEN 1 ELSE 0 END) ps_count 
+FROM demo.win_result 
+WHERE devicehostname IS NOT NULL AND devicehostname != '' AND deviceaddress IS NOT NULL AND deviceaddress != '' GROUP BY deviceaddress, type, y, m, d;

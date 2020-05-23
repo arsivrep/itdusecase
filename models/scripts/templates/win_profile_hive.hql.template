@@ -1,0 +1,7 @@
+-- create table in the <TENANT-ID> database for storing the profile anomaly score of entities and users for <DATA-SOURCE>
+
+CREATE TABLE IF NOT EXISTS <TENANT-ID>.<DATA-SOURCE>_profile_ml_score ( `name` string, `type` string, `time_window` string, `timestamp` bigint, `failedlogin_count` bigint, `fileactivity_count` bigint, `logins_count` bigint, `other_scripts_count` bigint, `pri_count` bigint, `ps_count` bigint, `zscore` string , `pas_kmeans` double, `pas_isolation` double, `pas_svm` double, `pas` double) PARTITIONED BY ( `y` int, `m` int, `d` int) STORED AS ORC LOCATION '/user/elysium/<TENANT-ID>/models/<DATA-SOURCE>/profile_score';
+
+-- create table in the <TENANT-ID> database for storing the event anomaly score of entities and users for <DATA-SOURCE>
+
+CREATE TABLE IF NOT EXISTS <TENANT-ID>.<DATA-SOURCE>_event_alert_z_score ( `guid` string, `timestamp` bigint, `user_name` string, `entity_name` string, `source_type` string, `alerts` string, `zscore` string , `alert_score` double, `event_score` double) PARTITIONED BY ( `y` int, `m` int, `d` int) STORED AS ORC LOCATION '/user/elysium/<TENANT-ID>/models/<DATA-SOURCE>/event_alert_score';
