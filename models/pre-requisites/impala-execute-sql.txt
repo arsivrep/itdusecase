@@ -50,7 +50,7 @@ on `prf`.`name` = `alrt`.`name` and `prf`.`y` = `alrt`.`y` and `prf`.`m` = `alrt
 
 
 
-# For the event aggregation table (Replace database and table name as per actual event table
+# For the event aggregation table (Replace database and table name as per actual event table.
 CREATE VIEW win_ml_aggregation AS                                                                    
 SELECT 
 devicehostname name, 'user' type, y, m, d, count(*) total_events, 
